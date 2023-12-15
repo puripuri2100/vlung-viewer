@@ -4,15 +4,14 @@
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
-use tauri::api::dialog::blocking::FileDialogBuilder;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 struct GroupInfo {
     group: usize,
     length: usize,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 struct AnalysisData {
     rows: usize,
     columns: usize,
@@ -32,7 +31,7 @@ fn parse_analysis_data(str: &str) -> Option<AnalysisData> {
         let lines = lines.collect::<Vec<&str>>();
         let mut data = vec![vec![vec![]; columns]; height];
         for i in 0..height {
-            let str_lst = &mut lines[(1 + (columns + 1) * i)..((columns + 1) * (i + 1))].iter();
+            let str_lst = &mut lines[((columns + 1) * i)..((columns + 1) * (i + 1))].iter();
             let z = str_lst.next().unwrap().parse::<usize>().unwrap();
             for (y, x_data_str) in str_lst.enumerate() {
                 for data_str in x_data_str.split(',') {
@@ -57,17 +56,12 @@ fn parse_analysis_data(str: &str) -> Option<AnalysisData> {
 }
 
 #[tauri::command]
-fn read_file() -> Option<AnalysisData> {
-    let file_path = FileDialogBuilder::new().pick_file();
-    if let Some(path) = file_path {
-        if let Ok(mut file) = File::open(path) {
-            let mut buf = Vec::new();
-            if file.read_to_end(&mut buf).is_ok() {
-                if let Ok(str) = std::string::String::from_utf8(buf) {
-                    parse_analysis_data(&str)
-                } else {
-                    None
-                }
+fn read_file(path: &str) -> Option<AnalysisData> {
+    if let Ok(mut file) = File::open(path) {
+        let mut buf = Vec::new();
+        if file.read_to_end(&mut buf).is_ok() {
+            if let Ok(str) = std::string::String::from_utf8(buf) {
+                parse_analysis_data(&str)
             } else {
                 None
             }
@@ -78,6 +72,7 @@ fn read_file() -> Option<AnalysisData> {
         None
     }
 }
+
 
 fn main() {
     tauri::Builder::default()
