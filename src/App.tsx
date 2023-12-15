@@ -1,28 +1,32 @@
 import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { open } from '@tauri-apps/api/dialog';
-import { Canvas, ThreeElements } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import "./App.css";
 
+type box_props = {
+  x: number,
+  y: number,
+  z: number,
+  group_number: number,
+  group_len: number,
+  color: string
+}
 
-function Box(props: ThreeElements['mesh']) {
+
+function Box(props: box_props) {
   const meshRef = useRef<THREE.Mesh>(null!);
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
   // カメラの回転
   //useFrame((state, delta) => (meshRef.current.rotation.x += delta));
   return (
     <mesh
-      {...props}
+      position={[props.x, props.y, props.z]}
       ref={meshRef}
-      scale={active ? 1.5 : 1}
-      onClick={(_event) => setActive(!active)}
-      onPointerOver={(_event) => setHover(true)}
-      onPointerOut={(_event) => setHover(false)}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
+    >
+      <boxGeometry args={[props.group_len, 1, 1]} />
+      <meshStandardMaterial color={props.color} />
     </mesh>
   )
 }
@@ -45,7 +49,7 @@ function App() {
     } else {
       // user selected a single directory
       
-    setAnalysisData(await invoke("read_file", {path: selected}));
+      setAnalysisData(await invoke("read_file", {path: selected}));
     }
   }
 
@@ -61,8 +65,25 @@ function App() {
             <OrbitControls makeDefault />
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
-            <Box position={[-1.2, 0, 0]} />
-            <Box position={[1.2, 0, 0]} />
+            {analysisData.data.map((xy, z) => {
+              return xy.map((x_group_data, y) => {
+                let x = 0;
+                for (const group_info of x_group_data) {
+                  if (group_info.group == 4) {
+                    const box = <Box
+                      x={x}
+                      y={y}
+                      z={z}
+                      group_number={group_info.group}
+                      group_len={group_info.length}
+                      color='green'
+                    />;
+                    x = x + group_info.length;
+                    return box
+                  }
+                }
+              })
+            })}
           </Canvas>
           :
           (<></>)
