@@ -30,7 +30,7 @@ function Box(props: ThreeElements['mesh']) {
 function App() {
 
 
-  const [analysisData, setAnalysisData] = useState<string | null>(null);
+  const [analysisData, setAnalysisData] = useState<analysis_data | null>(null);
 
   async function get_analysis_data() {
     setAnalysisData(await invoke("read_file"));
