@@ -1,6 +1,7 @@
 type group_info = {
   group: number,
-  length: number,
+  start: number,
+  end: number,
 }
 
 type analysis_data = {

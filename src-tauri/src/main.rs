@@ -8,7 +8,8 @@ use std::io::Read;
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 struct GroupInfo {
     group: usize,
-    length: usize,
+    start: usize,
+    end: usize,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -34,11 +35,13 @@ fn parse_analysis_data(str: &str) -> Option<AnalysisData> {
             let str_lst = &mut lines[((columns + 1) * i)..((columns + 1) * (i + 1))].iter();
             let z = str_lst.next().unwrap().parse::<usize>().unwrap();
             for (y, x_data_str) in str_lst.enumerate() {
+                let mut start = 0;
                 for data_str in x_data_str.split(',') {
                     let mut l = data_str.split('*');
                     let group = l.next().unwrap().parse().unwrap();
-                    let length = l.next().unwrap().parse().unwrap();
-                    data[z][y].push(GroupInfo { group, length });
+                    let length: usize = l.next().unwrap().parse().unwrap();
+                    data[z][y].push(GroupInfo { group, start, end : start + length });
+                    start += length;
                 }
             }
         }

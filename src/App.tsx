@@ -69,29 +69,26 @@ function App() {
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
             <camera position={[-10, -10, analysisData.height / 2]} />
-            {analysisData.data.map((xy, z) => {
-              return xy.map((x_group_data, y) => {
-                let x = 0;
-                for (const group_info of x_group_data) {
+            {analysisData.data.map((xy, z) => 
+              xy.map((x_group_data, y) => 
+                x_group_data.map((group_info) => {
                   const color =
-                    group_info.group == 0 ? 'green' :
-                    group_info.group == 1 ? 'red' :
-                    group_info.group == 2 ? 'blue' :
-                    group_info.group == 3 ? 'orange' :
-                    group_info.group == 4 ? 'yellow' : 'while';
-                    const box = <Box
-                      x={x}
+                    group_info.group == 0 ? 'white' :
+                    group_info.group == 1 ? 'green' :
+                    group_info.group == 2 ? 'red' :
+                    group_info.group == 3 ? 'blue' :
+                    group_info.group == 4 ? 'yellow' : 'white';
+                  return <Box
+                      x={group_info.start}
                       y={y}
                       z={z}
                       group_number={group_info.group}
-                      group_len={group_info.length}
+                      group_len={group_info.end - group_info.start}
                       color={color}
-                    />;
-                    x = x + group_info.length;
-                    return box
-                }
-              })
-            })}
+                    />
+                })
+              )
+            )}
           </Canvas>
           :
           (<></>)
