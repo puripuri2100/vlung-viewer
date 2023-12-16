@@ -20,15 +20,18 @@ function Box(props: box_props) {
   const meshRef = useRef<THREE.Mesh>(null!);
   // カメラの回転
   //useFrame((state, delta) => (meshRef.current.rotation.x += delta));
+  if (props.group_number != 0) {
   return (
     <mesh
-      position={[props.x, props.y, props.z]}
+      position={[props.x + (props.group_len / 2), props.y, props.z]}
       ref={meshRef}
     >
       <boxGeometry args={[props.group_len, 1, 1]} />
       <meshStandardMaterial color={props.color} />
     </mesh>
-  )
+  )} else {
+    return <></>
+  }
 }
 
 
@@ -65,22 +68,27 @@ function App() {
             <OrbitControls makeDefault />
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
+            <camera position={[-10, -10, analysisData.height / 2]} />
             {analysisData.data.map((xy, z) => {
               return xy.map((x_group_data, y) => {
                 let x = 0;
                 for (const group_info of x_group_data) {
-                  if (group_info.group == 4) {
+                  const color =
+                    group_info.group == 0 ? 'green' :
+                    group_info.group == 1 ? 'red' :
+                    group_info.group == 2 ? 'blue' :
+                    group_info.group == 3 ? 'orange' :
+                    group_info.group == 4 ? 'yellow' : 'while';
                     const box = <Box
                       x={x}
                       y={y}
                       z={z}
                       group_number={group_info.group}
                       group_len={group_info.length}
-                      color='green'
+                      color={color}
                     />;
                     x = x + group_info.length;
                     return box
-                  }
                 }
               })
             })}
