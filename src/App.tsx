@@ -10,6 +10,9 @@ type box_props = {
   x: number,
   y: number,
   z: number,
+  rows: number,
+  columns: number,
+  height: number,
   group_number: number,
   group_len: number,
   color: string
@@ -23,7 +26,11 @@ function Box(props: box_props) {
   if (props.group_number != 0) {
   return (
     <mesh
-      position={[props.x + (props.group_len / 2), props.y, props.z]}
+      position={[
+        props.x + (props.group_len / 2) - (props.rows / 2),
+        props.y - (props.columns / 2),
+        props.z - (props.height / 2)
+      ]}
       ref={meshRef}
     >
       <boxGeometry args={[props.group_len, 1, 1]} />
@@ -68,7 +75,6 @@ function App() {
             <OrbitControls makeDefault />
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
-            <camera position={[-10, -10, analysisData.height / 2]} />
             {analysisData.data.map((xy, z) => 
               xy.map((x_group_data, y) => 
                 x_group_data.map((group_info) => {
@@ -82,6 +88,9 @@ function App() {
                       x={group_info.start}
                       y={y}
                       z={z}
+                      rows={analysisData.rows}
+                      columns={analysisData.columns}
+                      height={analysisData.height}
                       group_number={group_info.group}
                       group_len={group_info.end - group_info.start}
                       color={color}
